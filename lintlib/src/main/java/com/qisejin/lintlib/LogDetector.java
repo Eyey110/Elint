@@ -1,52 +1,56 @@
 package com.qisejin.lintlib;
 
+import com.android.annotations.NonNull;
 import com.android.tools.lint.client.api.JavaParser;
 import com.android.tools.lint.detector.api.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import com.android.tools.lint.client.api.JavaParser;
 import com.android.tools.lint.detector.api.*;
 
-public class LogDetector extends Detector implements Detector.UastScanner {
+import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 
-    public static final Issue ISSUE = Issue.create(
-            "LogUse",
-            "避免使用Log/System.out.println",
-            "使用LogUtils，防止在正式包打印log",
-            Category.SECURITY, 5, Severity.WARNING,
-            new Implementation(LogDetector.class, Scope.JAVA_FILE_SCOPE));
+public class LogDetector extends Detector implements Detector.ClassScanner {
 
 
+    public static final Issue ISSUE = Issue.create("LogUtilsNotUsed",
+            "You must use our `LogUtils`",
+            "Logging should be avoided in production for security and performance reasons. Therefore, we created a LogUtils that wraps all our calls to Logger and disable them for release flavor.",
+            Category.MESSAGES,
+            9,
+            Severity.WARNING,
+            new Implementation(LogDetector.class,
+                    Scope.CLASS_FILE_SCOPE));
+
+    @Override
+    public List<String> getApplicableCallNames() {
+        return Arrays.asList("v", "d", "i", "w", "e", "wtf");
+    }
+
+    @Override
+    public List<String> getApplicableMethodNames() {
+        return Arrays.asList("v", "d", "i", "w", "e", "wtf");
+    }
 
 
-//    @Override
-//    public List<Class<? extends Node>> getApplicableNodeTypes() {
-//        return Collections.singletonList(MethodInvocation.class);
-//    }
-//
-//    @Override
-//    public AstVisitor createJavaVisitor(final JavaContext context) {
-//        return new ForwardingAstVisitor() {
-//            @Override
-//            public boolean visitMethodInvocation(MethodInvocation node) {
-//                if (node.toString().startsWith("System.out.println")) {
-//                    context.report(ISSUE, node, context.getLocation(node),
-//                            "请使用Ln，避免使用System.out.println");
-//                    return true;
-//                }
-//                JavaParser.ResolvedNode resolve = context.resolve(node);
-//                if (resolve instanceof JavaParser.ResolvedMethod) {
-//                    JavaParser.ResolvedMethod method = (JavaParser.ResolvedMethod) resolve;
-//                    JavaParser.ResolvedClass containingClass = method.getContainingClass();
-//                    if (containingClass.matches("android.util.Log")) {
-//                        context.report(ISSUE, node, context.getLocation(node),
-//                                "请使用Ln，避免使用Log");
-//                        return true;
-//                    }
-//                }
-//                return super.visitMethodInvocation(node);
-//            }
-//        };
-//    }
+    @Override
+    public void checkCall(@NonNull ClassContext context,
+                          @NonNull ClassNode classNode,
+                          @NonNull MethodNode method,
+                          @NonNull MethodInsnNode call) {
+        String owner = call.owner;
+        if (owner.startsWith("android/util/Log")) {
+            context.report(ISSUE,
+                    method,
+                    call,
+                    context.getLocation(call),
+                    "You must use `LogUtils`");
+        }
+    }
+
 }
