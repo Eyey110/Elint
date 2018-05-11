@@ -18,6 +18,8 @@ android {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.12'
+
     lintChecks project(path: ":lintlib", configuration: "lintChecks")
 }
 configurations {

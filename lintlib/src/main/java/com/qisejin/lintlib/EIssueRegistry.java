@@ -11,6 +11,9 @@ import java.util.List;
 public class EIssueRegistry extends IssueRegistry {
     @Override
     public List<Issue> getIssues() {
-        return Arrays.asList(LogDetector.ISSUE, NewThreadDetector.ISSUE);
+        return Arrays.asList(
+                DeprecatedApiDetector.WARNING_ISSUE, DeprecatedApiDetector.ERROR_ISSUE,
+                DirectConstructorDetector.WARNING_ISSUE, DirectConstructorDetector.ERROR_ISSUE
+        );
     }
 }
