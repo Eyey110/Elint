@@ -53,9 +53,16 @@ public class LintConfig {
             "  }\n" +
             "}";
 
-    List<MethodDeprecatedApi> methodDeprecatedApiList;
-    List<ConstructorDeprecatedApi> constructorDeprecatedApiList;
+    private List<MethodDeprecatedApi> methodDeprecatedApiList;
+   private List<ConstructorDeprecatedApi> constructorDeprecatedApiList;
 
+    public List<ConstructorDeprecatedApi> getConstructorDeprecatedApiList() {
+        return constructorDeprecatedApiList;
+    }
+
+    public List<MethodDeprecatedApi> getMethodDeprecatedApiList() {
+        return methodDeprecatedApiList;
+    }
 
     private LintConfig() {
 //        File projectDir = context.getProject().getDir();

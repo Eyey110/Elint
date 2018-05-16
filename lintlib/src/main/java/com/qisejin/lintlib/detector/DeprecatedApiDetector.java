@@ -1,4 +1,4 @@
-package com.qisejin.lintlib;
+package com.qisejin.lintlib.detector;
 
 import com.android.tools.lint.client.api.JavaEvaluator;
 import com.android.tools.lint.detector.api.Category;
@@ -9,6 +9,7 @@ import com.android.tools.lint.detector.api.JavaContext;
 import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
 import com.intellij.psi.PsiMethod;
+import com.qisejin.lintlib.LintConfig;
 import com.qisejin.lintlib.mode.MethodDeprecatedApi;
 
 import org.jetbrains.uast.UCallExpression;
@@ -45,7 +46,7 @@ public class DeprecatedApiDetector extends Detector implements Detector.UastScan
 
     @Override
     public List<String> getApplicableMethodNames() {
-        List<MethodDeprecatedApi> das = LintConfig.getInstance().methodDeprecatedApiList;
+        List<MethodDeprecatedApi> das = LintConfig.getInstance().getMethodDeprecatedApiList();
         List<String> methods = new ArrayList<>();
         for (MethodDeprecatedApi da : das) {
             String methodRegex = da.getMethodRegex();
@@ -65,7 +66,7 @@ public class DeprecatedApiDetector extends Detector implements Detector.UastScan
     @Override
     public void visitMethod(JavaContext context, UCallExpression node, PsiMethod method) {
         JavaEvaluator evaluator = context.getEvaluator();
-        List<MethodDeprecatedApi> das = LintConfig.getInstance().methodDeprecatedApiList;
+        List<MethodDeprecatedApi> das = LintConfig.getInstance().getMethodDeprecatedApiList();
         System.out.println(method.getName());
         System.out.println(method.getHierarchicalMethodSignature());
         for (MethodDeprecatedApi api : das) {

@@ -1,4 +1,4 @@
-package com.qisejin.lintlib;
+package com.qisejin.lintlib.detector;
 
 import com.android.tools.lint.client.api.JavaEvaluator;
 import com.android.tools.lint.detector.api.Category;
@@ -6,18 +6,16 @@ import com.android.tools.lint.detector.api.Detector;
 import com.android.tools.lint.detector.api.Implementation;
 import com.android.tools.lint.detector.api.Issue;
 import com.android.tools.lint.detector.api.JavaContext;
-import com.android.tools.lint.detector.api.Location;
 import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
 import com.intellij.psi.PsiMethod;
+import com.qisejin.lintlib.LintConfig;
 import com.qisejin.lintlib.mode.ConstructorDeprecatedApi;
-import com.qisejin.lintlib.mode.MethodDeprecatedApi;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.uast.UCallExpression;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +45,7 @@ public class DirectConstructorDetector extends Detector implements Detector.Uast
     @Nullable
     @Override
     public List<String> getApplicableConstructorTypes() {
-        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().constructorDeprecatedApiList;
+        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
         List<String> constructions = new ArrayList<>();
         for (ConstructorDeprecatedApi ca : das) {
             String construction = ca.getConstruction();
@@ -60,7 +58,7 @@ public class DirectConstructorDetector extends Detector implements Detector.Uast
 
     @Override
     public void visitConstructor(JavaContext context, UCallExpression node, PsiMethod constructor) {
-        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().constructorDeprecatedApiList;
+        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
         JavaEvaluator evaluator = context.getEvaluator();
         for (ConstructorDeprecatedApi api : das) {
             if (evaluator.isMemberInSubClassOf(constructor, api.getConstruction(), false)) {
