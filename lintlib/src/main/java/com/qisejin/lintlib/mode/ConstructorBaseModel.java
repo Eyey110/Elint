@@ -9,7 +9,7 @@ package com.qisejin.lintlib.mode;
  * @author Eyey
  */
 
-public class ConstructorDeprecatedApi extends DeprecatedApi {
+public class ConstructorBaseModel extends BaseModel {
     private String construction;
 
     public String getConstruction() {
@@ -23,7 +23,7 @@ public class ConstructorDeprecatedApi extends DeprecatedApi {
 
     @Override
     public String toString() {
-        return super.toString() + "ConstructorDeprecatedApi{" +
+        return super.toString() + "ConstructorBaseModel{" +
                 "construction='" + construction + '\'' +
                 '}';
     }

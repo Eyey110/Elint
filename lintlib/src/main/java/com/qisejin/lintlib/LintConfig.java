@@ -1,18 +1,24 @@
 package com.qisejin.lintlib;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.qisejin.lintlib.mode.ConstructorDeprecatedApi;
-import com.qisejin.lintlib.mode.DeprecatedApi;
-import com.qisejin.lintlib.mode.MethodDeprecatedApi;
+import com.google.gson.JsonSyntaxException;
+import com.qisejin.lintlib.mode.ConstructorBaseModel;
+import com.qisejin.lintlib.mode.MethodBaseModel;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
+
+import com.android.tools.lint.detector.api.Context;
+import com.qisejin.lintlib.mode.ResourceModel;
 
 /**
  * No Description
@@ -28,64 +34,94 @@ public class LintConfig {
 
     private static LintConfig config;
     private final static Object lock = new Object();
+    private boolean isInit = false;
 
-    //   MethodDeprecatedApi deprecatedApi;
-    static final String json = "{\n" +
-            "  \"lint-rules\": {\n" +
-            "    \"deprecated-api\": [\n" +
-            "      {\n" +
-            "        \"method-regex\": \"v|d|e|w|i\",\n" +
-            "        \"member-class\": \"android.util.Log\",\n" +
-            "        \"message\": \"请勿直接使用android.Util.Log，应该使用LogUtils\",\n" +
-            "        \"severity\": \"warning\"\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"field\": \"java.lang.System.out\",\n" +
-            "        \"message\": \"请勿直接使用System.out，应该使用LogUtils\",\n" +
-            "        \"severity\": \"warning\"\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"construction\": \"java.lang.Thread\",\n" +
-            "        \"message\": \"避免单独创建Thread执行后台任务，存在性能问题，建议使用AsyncTask\",\n" +
-            "        \"severity\": \"warning\"\n" +
-            "      }\n" +
-            "    ]\n" +
-            "  }\n" +
-            "}";
+    private static final String CONFIG_JSON_FILE_NAME = "lint-rules.json";
 
-    private List<MethodDeprecatedApi> methodDeprecatedApiList;
-   private List<ConstructorDeprecatedApi> constructorDeprecatedApiList;
+    //   MethodBaseModel deprecatedApi;
 
-    public List<ConstructorDeprecatedApi> getConstructorDeprecatedApiList() {
+    private List<MethodBaseModel> methodDeprecatedApiList = new ArrayList<>();
+    private List<ConstructorBaseModel> constructorDeprecatedApiList = new ArrayList<>();
+    private List<ResourceModel> resourceModels = new ArrayList<>();
+
+    public List<ConstructorBaseModel> getConstructorDeprecatedApiList() {
         return constructorDeprecatedApiList;
     }
 
-    public List<MethodDeprecatedApi> getMethodDeprecatedApiList() {
+    public List<MethodBaseModel> getMethodDeprecatedApiList() {
         return methodDeprecatedApiList;
     }
 
+    public List<ResourceModel> getResourceModels() {
+        return resourceModels;
+    }
+
     private LintConfig() {
-//        File projectDir = context.getProject().getDir();
-//        File configFile = new File(projectDir, "lint-config.json");
-//        if (configFile.exists() && configFile.isFile()) {
-//            // 读取配置文件...
-//        }
-        methodDeprecatedApiList = new ArrayList<>();
-        constructorDeprecatedApiList = new ArrayList<>();
-        JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-        JsonObject rules = jsonObject.get("lint-rules").getAsJsonObject();
-        JsonArray deprecatedApis = rules.get("deprecated-api").getAsJsonArray();
-        for (int i = 0; i < deprecatedApis.size(); i++) {
-            JsonObject jo = deprecatedApis.get(i).getAsJsonObject();
+
+    }
+
+
+    private synchronized void clear() {
+        methodDeprecatedApiList.clear();
+        constructorDeprecatedApiList.clear();
+        resourceModels.clear();
+    }
+
+    public synchronized void readConfigIfNot(Context context) {
+        if (isInit) {
+            return;
+        }
+        try {
+            JsonObject jsonObject = new JsonParser().parse(readJsonStrFromFile(context).toString()).getAsJsonObject();
+            JsonObject rules = jsonObject.get("lint-rules").getAsJsonObject();
+            JsonArray deprecatedApis = rules.get("deprecated-api").getAsJsonArray();
+            parseDeprecatedApis(deprecatedApis);
+            JsonArray resourceModelsArray = rules.get("resources").getAsJsonArray();
+            parseResourceModels(resourceModelsArray);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+        } finally {
+            isInit = true;
+        }
+    }
+
+
+    private StringBuilder readJsonStrFromFile(Context context) {
+        File projectDir = context.getProject().getDir();
+        File configFile = new File(projectDir, CONFIG_JSON_FILE_NAME);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (configFile.exists() && configFile.isFile()) {
+            try {
+                FileInputStream inputStream = new FileInputStream(configFile);
+                InputStreamReader reader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                String str = "";
+                while ((str = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(str);
+                }
+                inputStream.close();
+                reader.close();
+                bufferedReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return stringBuilder;
+    }
+
+
+    private void parseDeprecatedApis(JsonArray jsonArray) {
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JsonObject jo = jsonArray.get(i).getAsJsonObject();
             if (jo.has("method-regex")) {
-                MethodDeprecatedApi mda = new MethodDeprecatedApi();
+                MethodBaseModel mda = new MethodBaseModel();
                 mda.setMethodRegex(jo.get("method-regex").getAsString());
                 mda.setMemberClass(jo.get("member-class").getAsString());
                 mda.setMessage(jo.get("message").getAsString());
                 mda.setSeverity(jo.get("severity").getAsString());
                 methodDeprecatedApiList.add(mda);
             } else if (jo.has("construction")) {
-                ConstructorDeprecatedApi cda = new ConstructorDeprecatedApi();
+                ConstructorBaseModel cda = new ConstructorBaseModel();
                 cda.setConstruction(jo.get("construction").getAsString());
                 cda.setMessage(jo.get("message").getAsString());
                 cda.setSeverity(jo.get("severity").getAsString());
@@ -94,6 +130,20 @@ public class LintConfig {
         }
     }
 
+    private void parseResourceModels(JsonArray jsonArray) {
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JsonObject jo = jsonArray.get(i).getAsJsonObject();
+            ResourceModel rm = new ResourceModel();
+            rm.folderName = jo.get("folder").getAsString();
+            rm.attrKey = jo.get("attr-key").getAsString();
+            rm.tagName = jo.get("tag-name").getAsString();
+            rm.attrValueRegex = jo.get("attr-value-regex").getAsString();
+            rm.setMessage(jo.get("message").getAsString());
+            rm.setSeverity(jo.get("severity").getAsString());
+            resourceModels.add(rm);
+        }
+
+    }
 
     public static LintConfig getInstance() {
         if (config == null) {

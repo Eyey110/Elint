@@ -9,7 +9,7 @@ package com.qisejin.lintlib.mode;
  * @author Eyey
  */
 
-public class MethodDeprecatedApi extends DeprecatedApi {
+public class MethodBaseModel extends BaseModel {
     private String methodRegex;
     private String memberClass;
 
@@ -32,7 +32,7 @@ public class MethodDeprecatedApi extends DeprecatedApi {
 
     @Override
     public String toString() {
-        return super.toString() + "MethodDeprecatedApi{" +
+        return super.toString() + "MethodBaseModel{" +
                 "methodRegex='" + methodRegex + '\'' +
                 ", memberClass='" + memberClass + '\'' +
                 '}';

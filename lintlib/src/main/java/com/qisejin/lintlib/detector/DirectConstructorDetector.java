@@ -10,7 +10,7 @@ import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
 import com.intellij.psi.PsiMethod;
 import com.qisejin.lintlib.LintConfig;
-import com.qisejin.lintlib.mode.ConstructorDeprecatedApi;
+import com.qisejin.lintlib.mode.ConstructorBaseModel;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.uast.UCallExpression;
@@ -27,7 +27,7 @@ import java.util.List;
  * @author Eyey
  */
 
-public class DirectConstructorDetector extends Detector implements Detector.UastScanner {
+public class DirectConstructorDetector extends BaseDetector implements Detector.UastScanner {
     public static final Issue WARNING_ISSUE = Issue.create(
             "DirectConstructor",
             "避免直接使用构造函数",
@@ -42,12 +42,14 @@ public class DirectConstructorDetector extends Detector implements Detector.Uast
             Category.SECURITY, 9, Severity.ERROR,
             new Implementation(DirectConstructorDetector.class, Scope.JAVA_FILE_SCOPE));
 
+
+
     @Nullable
     @Override
     public List<String> getApplicableConstructorTypes() {
-        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
+        List<ConstructorBaseModel> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
         List<String> constructions = new ArrayList<>();
-        for (ConstructorDeprecatedApi ca : das) {
+        for (ConstructorBaseModel ca : das) {
             String construction = ca.getConstruction();
             if (construction != null && !construction.isEmpty()) {
                 constructions.add(construction);
@@ -58,9 +60,9 @@ public class DirectConstructorDetector extends Detector implements Detector.Uast
 
     @Override
     public void visitConstructor(JavaContext context, UCallExpression node, PsiMethod constructor) {
-        List<ConstructorDeprecatedApi> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
+        List<ConstructorBaseModel> das = LintConfig.getInstance().getConstructorDeprecatedApiList();
         JavaEvaluator evaluator = context.getEvaluator();
-        for (ConstructorDeprecatedApi api : das) {
+        for (ConstructorBaseModel api : das) {
             if (evaluator.isMemberInSubClassOf(constructor, api.getConstruction(), false)) {
                 context.report("warning".equals(api.getSeverity()) ? WARNING_ISSUE : ERROR_ISSUE,
                         constructor,

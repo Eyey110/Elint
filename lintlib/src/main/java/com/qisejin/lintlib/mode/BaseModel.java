@@ -9,7 +9,7 @@ package com.qisejin.lintlib.mode;
  * @author Eyey
  */
 
-public class DeprecatedApi {
+public class BaseModel {
     private String message;
     private String severity;
 
@@ -33,7 +33,7 @@ public class DeprecatedApi {
 
     @Override
     public String toString() {
-        return "DeprecatedApi{" +
+        return "BaseModel{" +
                 "message='" + message + '\'' +
                 ", severity='" + severity + '\'' +
                 '}';

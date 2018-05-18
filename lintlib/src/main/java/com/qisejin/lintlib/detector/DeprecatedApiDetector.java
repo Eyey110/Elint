@@ -10,7 +10,7 @@ import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
 import com.intellij.psi.PsiMethod;
 import com.qisejin.lintlib.LintConfig;
-import com.qisejin.lintlib.mode.MethodDeprecatedApi;
+import com.qisejin.lintlib.mode.MethodBaseModel;
 
 import org.jetbrains.uast.UCallExpression;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * @author Eyey
  */
 
-public class DeprecatedApiDetector extends Detector implements Detector.UastScanner {
+public class DeprecatedApiDetector extends BaseDetector implements Detector.UastScanner {
     public static final Issue WARNING_ISSUE = Issue.create("DeprecatedApiWarning",
             "避免调用此方法",
             "避免调用此方法，详情请看Message",
@@ -44,11 +44,12 @@ public class DeprecatedApiDetector extends Detector implements Detector.UastScan
             new Implementation(DeprecatedApiDetector.class,
                     Scope.JAVA_FILE_SCOPE));
 
+
     @Override
     public List<String> getApplicableMethodNames() {
-        List<MethodDeprecatedApi> das = LintConfig.getInstance().getMethodDeprecatedApiList();
+        List<MethodBaseModel> das = LintConfig.getInstance().getMethodDeprecatedApiList();
         List<String> methods = new ArrayList<>();
-        for (MethodDeprecatedApi da : das) {
+        for (MethodBaseModel da : das) {
             String methodRegex = da.getMethodRegex();
             if (methodRegex != null && !methodRegex.isEmpty()) {
                 String[] ms = methodRegex.split("\\|");
@@ -66,10 +67,8 @@ public class DeprecatedApiDetector extends Detector implements Detector.UastScan
     @Override
     public void visitMethod(JavaContext context, UCallExpression node, PsiMethod method) {
         JavaEvaluator evaluator = context.getEvaluator();
-        List<MethodDeprecatedApi> das = LintConfig.getInstance().getMethodDeprecatedApiList();
-        System.out.println(method.getName());
-        System.out.println(method.getHierarchicalMethodSignature());
-        for (MethodDeprecatedApi api : das) {
+        List<MethodBaseModel> das = LintConfig.getInstance().getMethodDeprecatedApiList();
+        for (MethodBaseModel api : das) {
             if (evaluator.isMemberInSubClassOf(method, api.getMemberClass(), false)) {
                 context.report("warning".equals(api.getSeverity()) ? WARNING_ISSUE : ERROR_ISSUE,
                         method,

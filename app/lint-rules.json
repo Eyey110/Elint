@@ -1,0 +1,32 @@
+{
+  "lint-rules": {
+    "deprecated-api": [
+      {
+        "method-regex": "(v|d|e|w|i)",
+        "member-class": "android.util.Log",
+        "message": "请勿直接使用android.Util.Log，应该使用LogUtils",
+        "severity": "warning"
+      },
+      {
+        "field": "java.lang.System.out",
+        "message": "请勿直接使用System.out，应该使用LogUtils",
+        "severity": "warning"
+      },
+      {
+        "construction": "java.lang.Thread",
+        "message": "避免单独创建Thread执行后台任务，存在性能问题",
+        "severity": "warning"
+      }
+    ],
+    "resources": [
+      {
+        "folder": "values",
+        "tag-name": "color",
+        "attr-key": "name",
+        "attr-value-regex": "color_([0-9a-fA-F]{8}|[0-9a-fA-F]{6})",
+        "message": "color命名必须符合规定",
+        "severity": "warning"
+      }
+    ]
+  }
+}
