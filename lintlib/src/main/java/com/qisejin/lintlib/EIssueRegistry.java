@@ -5,6 +5,7 @@ import com.android.tools.lint.client.api.IssueRegistry;
 import com.android.tools.lint.detector.api.Issue;
 import com.qisejin.lintlib.detector.DeprecatedApiDetector;
 import com.qisejin.lintlib.detector.DirectConstructorDetector;
+import com.qisejin.lintlib.detector.NewMessageDetector;
 import com.qisejin.lintlib.detector.ResourceFormatDetector;
 
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,8 @@ public class EIssueRegistry extends IssueRegistry {
         return Arrays.asList(
                 DeprecatedApiDetector.WARNING_ISSUE, DeprecatedApiDetector.ERROR_ISSUE,
                 DirectConstructorDetector.WARNING_ISSUE, DirectConstructorDetector.ERROR_ISSUE,
-                ResourceFormatDetector.ISSUE_ERROR, ResourceFormatDetector.ISSUE_WARNING
+                ResourceFormatDetector.ISSUE_ERROR, ResourceFormatDetector.ISSUE_WARNING,
+                NewMessageDetector.WARNING_ISSUE
         );
     }
 }

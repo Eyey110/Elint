@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
@@ -15,29 +15,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lintOptions {
+        textReport true
+        textOutput 'stdout'
+        ignore 'InvalidPackage'
+    }
 }
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 dependencies {
     testImplementation 'junit:junit:4.12'
-
-    lintChecks project(path: ":lintlib", configuration: "lintChecks")
-}
-configurations {
-    lintChecks
-}
-
-task copyLintJar(type: Copy){
-    from (configurations.lintChecks) {
-        rename {
-            String fileName ->
-                'lint.jar'
-        }
-    }
-    into 'build/intermediates/lint/'
+    lintChecks project(":lintlib")
 }
 
 
-project.afterEvaluate{
-    def compileLintTask = project.tasks.find {it.name == 'compileLint'}
-    compileLintTask.dependsOn(copyLintJar)
-}
