@@ -4,8 +4,7 @@
 一些常用的可自定义Lint规则。
 
 # 如何使用
-clone该工程，rebuild会在build/outputs下生成一个aar文件。
-在需要检测的工程中import一个module,从aar导入module，并在需要检测的工程目录下新建“lint-rules.json”文件，直接配置规则即可。
+直接调用./gradlew build  会生成lint报告在build/reports文件夹里
 
 示例配置在[这里](https://github.com/Eyey110/Elint/blob/master/app/lint-rules.json)
 
